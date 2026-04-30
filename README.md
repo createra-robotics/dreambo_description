@@ -4,6 +4,8 @@
 
 ## Dreambo Torso Description
 
+![Dreambo Torso URDF](assets/dreambo_torso_urdf.png)
+
 ### 1. Cardanic / Gimbal-driven Spherical Joint (串联双轴正交驱动球形关节)
 
 题目所描述的结构在机构学里有一个明确的、规范的名字：
@@ -126,15 +128,34 @@ K   = ( L_r² − L_a² − R² ) / ( −2 · L_a · R )
 
 可行性：装配条件 `|K| ≤ 1`，否则期望角超出推杆能达到的工作空间。
 
-#### 4.3 舵机 PWM 映射
+#### 4.3 舵机角 → SM40BL 位置码
 
-舵机一般工作在 [θ_min, θ_max] 对应 [PWM_min, PWM_max]（典型 SG90/MG996R: −90°..+90° ↔ 500..2500 µs）。把上一步得到的 `θ_s` 减去舵机零位 `θ_s0`，再线性映射即可。
+本项目实际使用 **FEETECH SM40BL**（无刷总线伺服，**RS-485 半双工差分总线**，FEETECH SMS-BL 协议）。它不接 PWM，而是挂到一对差分线 (A/B) 上，靠 ID 寻址，位置以 **12-bit 整数码 (0..4095)** 给出，对应 **0°..360°**（出厂默认；2048 即机械中位）。
+
+把上一步求得的 `θ_s` (rad) 转成位置码：
+
+```
+pos = round( 2048 + θ_s · (4096 / 2π) ) − offset_id
+pos = clip(pos, 0, 4095)
+```
+
+`offset_id` 是该舵机的零位标定值（让关节回正时此舵机的 raw count）。SM40BL 常用控制表寄存器（具体地址以官方 SMS-BL 手册为准）：
+
+| 名称 | 地址 | 字节 | 含义 |
+|---|---|---|---|
+| Torque Enable | 40 (0x28) | 1 | 0=自由 / 1=保持 |
+| Goal Position | 42 (0x2A) | 2 (LE) | 0..4095 |
+| Goal Time | 44 (0x2C) | 2 (LE) | 到位耗时 ms (0=最快) |
+| Goal Speed | 46 (0x2E) | 2 (LE) | 步/s, 0=最大 |
+| Present Position | 56 (0x38) | 2 (LE) | 实时位置 |
+
+> **注意**：SM-BL 系列虽然包格式（`FF FF ID LEN INST ADDR ... CHK`）与 FEETECH 的 STS/SCS 同源，但物理层是 **RS-485**，不是 TTL UART —— 必须通过 USB↔RS-485 适配器（或 RS-485 收发芯片如 MAX485 / ADM2483）接入，**不能直接用 USB-TTL**。
 
 ---
 
 ### 5. Python 参考实现 / Python Reference Implementation
 
-下面给出**纯几何解算**和**两种常见硬件驱动**（Adafruit PCA9685 over I²C，以及通过串口对接 Arduino 的 `Servo`）。两者只换一个驱动后端，解算函数完全复用。
+下面给出**纯几何解算 + FEETECH SM40BL RS-485 总线驱动**：用 `pyserial` 通过 USB↔RS-485 适配器收发 SMS-BL 协议包（也可改用官方 `feetech_servo_sdk` / `scservo_sdk`，注释里给出对应 API）。
 
 #### 5.1 `cardan_kinematics.py` — 解算 + 抽象舵机后端
 
@@ -215,41 +236,91 @@ class CardanGimbal:
 
 
 # ----------------------------------------------------------------------
-# 3. 舵机驱动后端 (插件式)
+# 3. 舵机驱动后端 — FEETECH SM40BL (STS/SCS 协议)
 # ----------------------------------------------------------------------
 class ServoBackend(Protocol):
-    def write_angle(self, channel: int, angle_rad: float) -> None: ...
+    def write_angle(self, servo_id: int, angle_rad: float) -> None: ...
 
 
-class PCA9685Backend:
-    """Drive hobby servos over I²C via Adafruit PCA9685.
-    pip install adafruit-circuitpython-servokit
+class SM40BLBackend:
+    """Drive FEETECH SM40BL brushless bus servos over half-duplex RS-485.
+
+    Wiring: PC ── USB↔RS-485 adapter (A/B differential) ── SM40BL bus
+            + 独立电机供电 (12 V / ≥ 3 A) + 总线终端 120 Ω (长线时)
+    Default factory settings: typically 1 Mbps, ID 1, 0..4095 counts over 0°..360°.
+    The wire-format packet is FEETECH SMS-BL (header FF FF, same framing as STS),
+    only the physical layer is RS-485 instead of TTL.
+
+    pip install pyserial
+    (Or use FEETECH's official SDK: `pip install feetech-servo-sdk` /
+     `scservo_sdk` — same packet, just point its PortHandler at the
+     USB-RS485 COM port.)
+
+    Auto-direction USB-RS485 adapters (CH340/FT232 + MAX485 with auto DE/RE)
+    are recommended; with manual DE/RE adapters you must toggle RTS in
+    `_write` before/after the bytes are flushed.
     """
-    def __init__(self, channels: int = 16, freq: int = 50,
-                 pulse_min_us: int = 500, pulse_max_us: int = 2500,
-                 angle_range_rad: float = math.pi):
-        from adafruit_servokit import ServoKit          # noqa: F401 (lazy import)
-        self._kit = ServoKit(channels=channels, frequency=freq)
-        for ch in range(channels):
-            self._kit.servo[ch].set_pulse_width_range(pulse_min_us, pulse_max_us)
-            self._kit.servo[ch].actuation_range = math.degrees(angle_range_rad)
 
-    def write_angle(self, channel: int, angle_rad: float) -> None:
-        deg = math.degrees(angle_rad) + 90.0      # map [-90,+90]° → [0,180]°
-        deg = max(0.0, min(180.0, deg))
-        self._kit.servo[channel].angle = deg
+    # SMS-BL control table addresses (same layout as STS family)
+    ADDR_TORQUE_ENABLE   = 40
+    ADDR_GOAL_POSITION   = 42
+    ADDR_GOAL_TIME       = 44
+    ADDR_GOAL_SPEED      = 46
+    ADDR_PRESENT_POSITION = 56
 
+    # Instructions
+    INST_WRITE = 0x03
 
-class SerialArduinoBackend:
-    """Send 'S<ch> <deg>\\n' lines to an Arduino running the standard Servo library."""
-    def __init__(self, port: str, baud: int = 115200, timeout: float = 0.1):
-        import serial                              # noqa: F401 (lazy import)
+    COUNTS_PER_REV = 4096
+    CENTER_COUNT   = 2048
+
+    def __init__(self, port: str, baud: int = 1_000_000, timeout: float = 0.05,
+                 default_speed: int = 0, default_time_ms: int = 0,
+                 manual_de_re: bool = False):
+        import serial                                       # noqa: F401 (lazy import)
         self._ser = serial.Serial(port, baud, timeout=timeout)
-        time.sleep(2.0)                            # Arduino reset settle
+        self._speed = default_speed       # 0 = max
+        self._time  = default_time_ms     # 0 = use speed
+        self._manual_de_re = manual_de_re # True if 485 adapter needs RTS toggling
+        self._zero_offset: dict[int, int] = {}              # per-id offset in counts
 
-    def write_angle(self, channel: int, angle_rad: float) -> None:
-        deg = max(0, min(180, int(round(math.degrees(angle_rad) + 90))))
-        self._ser.write(f"S{channel} {deg}\n".encode("ascii"))
+    # ---- public API -----------------------------------------------------
+    def set_zero_offset(self, servo_id: int, offset_counts: int) -> None:
+        """Set the raw count that should map to angle = 0."""
+        self._zero_offset[servo_id] = int(offset_counts)
+
+    def torque(self, servo_id: int, on: bool) -> None:
+        self._write(servo_id, self.ADDR_TORQUE_ENABLE, bytes([1 if on else 0]))
+
+    def write_angle(self, servo_id: int, angle_rad: float) -> None:
+        pos = self._angle_to_counts(servo_id, angle_rad)
+        # 6-byte payload: pos_lo, pos_hi, time_lo, time_hi, speed_lo, speed_hi
+        payload = (
+            pos.to_bytes(2, "little")
+            + self._time.to_bytes(2, "little")
+            + self._speed.to_bytes(2, "little")
+        )
+        self._write(servo_id, self.ADDR_GOAL_POSITION, payload)
+
+    # ---- helpers --------------------------------------------------------
+    def _angle_to_counts(self, servo_id: int, angle_rad: float) -> int:
+        raw = self.CENTER_COUNT + int(round(angle_rad * self.COUNTS_PER_REV / (2 * math.pi)))
+        raw -= self._zero_offset.get(servo_id, 0)
+        return max(0, min(self.COUNTS_PER_REV - 1, raw))
+
+    def _write(self, servo_id: int, address: int, data: bytes) -> None:
+        # FEETECH SMS-BL packet (RS-485): FF FF ID LEN INST ADDR DATA... CHK
+        length = len(data) + 3                               # INST + ADDR + DATA + CHK_excl
+        body = bytes([servo_id, length, self.INST_WRITE, address]) + data
+        chk = (~sum(body)) & 0xFF
+        pkt = b"\xff\xff" + body + bytes([chk])
+        if self._manual_de_re:
+            self._ser.setRTS(True)        # drive bus (DE high, RE high)
+            self._ser.write(pkt)
+            self._ser.flush()             # wait for last byte to leave the UART
+            self._ser.setRTS(False)       # release bus back to receive
+        else:
+            self._ser.write(pkt)
 
 
 # ----------------------------------------------------------------------
@@ -257,17 +328,17 @@ class SerialArduinoBackend:
 # ----------------------------------------------------------------------
 class GimbalController:
     def __init__(self, gimbal: CardanGimbal, backend: ServoBackend,
-                 yaw_channel: int = 0, pitch_channel: int = 1):
-        self.gimbal  = gimbal
-        self.backend = backend
-        self.yaw_ch  = yaw_channel
-        self.pit_ch  = pitch_channel
+                 yaw_id: int = 1, pitch_id: int = 2):
+        self.gimbal   = gimbal
+        self.backend  = backend
+        self.yaw_id   = yaw_id            # SM40BL ID on the TTL bus
+        self.pitch_id = pitch_id
 
     def go_to(self, theta_yaw_deg: float, theta_pitch_deg: float) -> None:
         ty, tp = math.radians(theta_yaw_deg), math.radians(theta_pitch_deg)
         sy, sp = self.gimbal.ik(ty, tp)
-        self.backend.write_angle(self.yaw_ch, sy)
-        self.backend.write_angle(self.pit_ch, sp)
+        self.backend.write_angle(self.yaw_id,   sy)
+        self.backend.write_angle(self.pitch_id, sp)
 
     def sweep(self, yaw_range_deg=(-30, 30), pitch_range_deg=(-20, 20),
               steps: int = 60, period_s: float = 4.0) -> None:
@@ -281,15 +352,14 @@ class GimbalController:
             time.sleep(dt)
 ```
 
-#### 5.2 `demo.py` — 演示：让输出杆走一个 Lissajous 轨迹
+#### 5.2 `demo.py` — 演示：用 SM40BL 让输出杆走一个 Lissajous 轨迹
 
 ```python
-"""Demo: drive the Cardan gimbal with two hobby servos."""
+"""Demo: drive the Cardan gimbal with two FEETECH SM40BL bus servos."""
 import math
 from cardan_kinematics import (
     LinkageGeometry, CardanGimbal,
-    PCA9685Backend, SerialArduinoBackend,
-    GimbalController,
+    SM40BLBackend, GimbalController,
 )
 
 # ---- 1. 把你机构的实测/CAD 几何填进来 (单位 mm, rad) ----
@@ -300,7 +370,7 @@ yaw_link = LinkageGeometry(
     L_o        = 14.0,               # 抱箍上铰点到 Z 轴距离
     theta_0    = math.radians(110),  # θ_yaw=0 时摇杆方位
     branch     = +1,
-    servo_zero = math.radians(90),   # 舵机机械中位
+    servo_zero = 0.0,                # SM40BL 在 backend 侧用 set_zero_offset 标定
 )
 
 pitch_link = LinkageGeometry(
@@ -310,16 +380,30 @@ pitch_link = LinkageGeometry(
     L_o        = 13.5,
     theta_0    = math.radians(70),
     branch     = -1,
-    servo_zero = math.radians(90),
+    servo_zero = 0.0,
 )
 
 gimbal = CardanGimbal(yaw_linkage=yaw_link, pitch_linkage=pitch_link)
 
-# ---- 2. 选一个硬件后端 (任选其一) ----
-backend = PCA9685Backend()                            # I²C / PCA9685
-# backend = SerialArduinoBackend(port="COM5")         # Arduino + Servo.h
+# ---- 2. RS-485 总线后端：SM40BL 通过 USB↔RS-485 适配器接到电脑 ----
+#    Windows: "COM5"   Linux/macOS: "/dev/ttyUSB0"
+#    若用了带自动 DE/RE 的 485 适配器，manual_de_re=False；否则置 True。
+backend = SM40BLBackend(port="COM5", baud=1_000_000,
+                        default_time_ms=0, default_speed=2400,
+                        manual_de_re=False)
 
-ctrl = GimbalController(gimbal, backend, yaw_channel=0, pitch_channel=1)
+# 总线上 yaw=ID1, pitch=ID2 (用 FEETECH 调试器 FD 预先烧录好 ID)
+YAW_ID, PITCH_ID = 1, 2
+
+# 标定零位：让两条连杆物理回中后，从舵机读出 Present Position，把 raw count 填入
+backend.set_zero_offset(YAW_ID,   0)     # e.g. 实测 raw=2105 ⇒ offset=57
+backend.set_zero_offset(PITCH_ID, 0)
+
+# 上电后默认是 free，需要使能力矩
+backend.torque(YAW_ID,   True)
+backend.torque(PITCH_ID, True)
+
+ctrl = GimbalController(gimbal, backend, yaw_id=YAW_ID, pitch_id=PITCH_ID)
 
 # ---- 3. 跑演示 ----
 if __name__ == "__main__":
@@ -330,26 +414,14 @@ if __name__ == "__main__":
     ctrl.go_to(0.0, 0.0)
 ```
 
-#### 5.3 配套的 Arduino 端最小固件（仅当用 `SerialArduinoBackend` 时）
+#### 5.3 接线 / 上电要点（FEETECH SM40BL，RS-485）
 
-```cpp
-// upload to Arduino; expects lines like "S0 95\n"
-#include <Servo.h>
-Servo s[2];
-const int pins[2] = {9, 10};
-void setup() { Serial.begin(115200); for (int i=0;i<2;i++) s[i].attach(pins[i]); }
-void loop() {
-  static char buf[16]; static int n=0;
-  while (Serial.available()) {
-    char c = Serial.read();
-    if (c=='\n') { buf[n]=0; n=0;
-      int ch, deg;
-      if (sscanf(buf, "S%d %d", &ch, &deg)==2 && ch>=0 && ch<2)
-        s[ch].write(constrain(deg,0,180));
-    } else if (n<15) buf[n++]=c;
-  }
-}
-```
+- **总线物理层是 RS-485**，**不是 TTL UART**。SM40BL 的接线一般是 4 线：`VCC` / `GND` / `485-A` / `485-B`。所有 SM40BL 的 A 并 A、B 并 B，接到 USB↔RS-485 适配器；电机供电必须**独立**（典型 12 V / ≥3 A），适配器只承担信号。
+- **总线收发器**：推荐用带自动方向（auto DE/RE）的 USB↔485 适配器（如 FT232 + ADM2483、CH340 + 自动 485 模块）；若适配器需要手动控制 DE/RE，把 `manual_de_re=True` 让代码用 RTS 切换收发。
+- **终端电阻**：长走线（>1 m）或菊花链多个舵机时，在物理总线两端各加一个 120 Ω 终端电阻可显著改善信号完整性。
+- **ID 与波特率**：出厂默认 ID=1 / 1 Mbps。两个舵机不能共 ID，先用 FEETECH 上位机（FD 调试软件 + 官方 USB-485 调试器）把 yaw 设为 ID=1、pitch 设为 ID=2。
+- **力矩使能**：每次上电后默认无力矩（自由状态），先 `backend.torque(id, True)` 再下发位置。
+- **限速**：`default_speed`（步/s）和 `default_time_ms` 二选一非零即可，速度 0 = 最大，跑 demo 前建议先设到 1000–3000 步/s 防止甩动过冲。
 
 ---
 
@@ -357,7 +429,7 @@ void loop() {
 
 1. **几何参数先量后调**：`O_s, L_a, L_r, L_o, θ_0` 先用 CAD 或卡尺量出来，跑 IK 比较 servo 实际角度是否对得上。
 2. **`branch` 选支**：装配后只有一个分支可达，把 `branch = ±1` 切换一下哪个不报错就用哪个。
-3. **`servo_zero` 校零**：让关节物理停在 `(θ_yaw, θ_pitch) = (0, 0)`，读出此刻的 servo PWM，把对应弧度填入 `servo_zero`。
+3. **零位校准**：让关节物理停在 `(θ_yaw, θ_pitch) = (0, 0)`，从 SM40BL Present Position (寄存器 56) 读到的 raw count 直接填进 `backend.set_zero_offset(id, raw)`；不要用 `LinkageGeometry.servo_zero` 重复偏置。
 4. **工作空间留余量**：跑 demo 前先 `for ang in range(-40,40,5): try gimbal.ik(...)`，把会抛 `ValueError` 的角度排除掉，避免硬件卡死。
 5. **球副间隙**：推杆两端最好用 M3 球头扣（KY/KZ 系列），配合做一个微小自旋自由度，避免 RSSR 装配过约束导致卡顿。
 
