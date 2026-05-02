@@ -1,0 +1,453 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot
+  name="dreambo_torso">
+  <link
+    name="base_link">
+    <inertial>
+      <origin
+        xyz="0.00510423680323092 1.05408567854846E-06 0.0780364587105506"
+        rpy="0 0 0" />
+      <mass
+        value="3.82321438743592" />
+      <inertia
+        ixx="0.00640989034291959"
+        ixy="-1.06937278701886E-07"
+        ixz="4.35704398716628E-05"
+        iyy="0.00803915882264379"
+        iyz="2.76729762060599E-08"
+        izz="0.0107547518033842" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://dreambo_torso/meshes/base_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.894117647058823 0.894117647058823 0.894117647058823 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://dreambo_torso/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="l_arm_pitch_link">
+    <inertial>
+      <origin
+        xyz="-0.00272080141029714 0.00734963864566155 0.00585575478034783"
+        rpy="0 0 0" />
+      <mass
+        value="0.00167919809468606" />
+      <inertia
+        ixx="2.10796257242506E-07"
+        ixy="3.70882236821578E-08"
+        ixz="4.12976444768763E-08"
+        iyy="1.64770893400219E-07"
+        iyz="-7.98219707699893E-08"
+        izz="1.41103048346567E-07" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://dreambo_torso/meshes/l_arm_pitch_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.894117647058823 0.894117647058823 0.894117647058823 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://dreambo_torso/meshes/l_arm_pitch_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="l_arm_pitch_joint"
+    type="revolute">
+    <origin
+      xyz="0.0284969243091808 0.0845270764279396 0.141177215668516"
+      rpy="-0.262997873967215 -0.0977384381116747 0.807389311972579" />
+    <parent
+      link="base_link" />
+    <child
+      link="l_arm_pitch_link" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="0"
+      upper="0"
+      effort="40"
+      velocity="10" />
+  </joint>
+  <link
+    name="l_arm_yaw_link">
+    <inertial>
+      <origin
+        xyz="-0.00609191506312685 0.00115955541487422 0.0137493541862755"
+        rpy="0 0 0" />
+      <mass
+        value="0.00259241901469074" />
+      <inertia
+        ixx="5.19111867678668E-07"
+        ixy="1.96473346455597E-08"
+        ixz="1.85205175269411E-07"
+        iyy="6.18593074002241E-07"
+        iyz="-3.52524664633172E-08"
+        izz="1.71809849710816E-07" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://dreambo_torso/meshes/l_arm_yaw_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.894117647058823 0.894117647058823 0.894117647058823 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://dreambo_torso/meshes/l_arm_yaw_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="l_arm_yaw_joint"
+    type="revolute">
+    <origin
+      xyz="0.012 0.0869507292306195 0.10052826249908"
+      rpy="-0.349065850398861 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="l_arm_yaw_link" />
+    <axis
+      xyz="0 0 -1" />
+    <limit
+      lower="0"
+      upper="0"
+      effort="40"
+      velocity="10" />
+  </joint>
+  <link
+    name="r_arm_pitch_link">
+    <inertial>
+      <origin
+        xyz="0.00453328942861779 0.00734963610166351 0.00459802861823644"
+        rpy="0 0 0" />
+      <mass
+        value="0.00167920163286678" />
+      <inertia
+        ixx="1.76715737279251E-07"
+        ixy="-6.17949959569628E-08"
+        ixz="-5.40295856745528E-08"
+        iyy="1.64770913467681E-07"
+        iyz="-6.26774479578327E-08"
+        izz="1.75183593040923E-07" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://dreambo_torso/meshes/r_arm_pitch_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.894117647058823 0.894117647058823 0.894117647058823 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://dreambo_torso/meshes/r_arm_pitch_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="r_arm_pitch_joint"
+    type="revolute">
+    <origin
+      xyz="0.0284969243091807 -0.0845270764279395 0.141177215668516"
+      rpy="-0.262997873967217 0.0977384381116756 2.33420334161721" />
+    <parent
+      link="base_link" />
+    <child
+      link="r_arm_pitch_link" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="0"
+      upper="0"
+      effort="40"
+      velocity="10" />
+  </joint>
+  <link
+    name="r_arm_yaw_link">
+    <inertial>
+      <origin
+        xyz="-0.00618420192715495 -0.000460033720488529 0.013749352698381"
+        rpy="0 0 0" />
+      <mass
+        value="0.00259241998644893" />
+      <inertia
+        ixx="5.15960879861057E-07"
+        ixy="-7.91293241774731E-09"
+        ixz="1.88010927533749E-07"
+        iyy="6.21744298270512E-07"
+        iyz="1.39859749087212E-08"
+        izz="1.71809929251273E-07" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://dreambo_torso/meshes/r_arm_yaw_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.894117647058823 0.894117647058823 0.894117647058823 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://dreambo_torso/meshes/r_arm_yaw_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="r_arm_yaw_joint"
+    type="revolute">
+    <origin
+      xyz="0.012 -0.0869507292306194 0.10052826249908"
+      rpy="0.349065850398861 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="r_arm_yaw_link" />
+    <axis
+      xyz="0 0 -1" />
+    <limit
+      lower="0"
+      upper="0"
+      effort="40"
+      velocity="10" />
+  </joint>
+  <link
+    name="neck_yaw_link">
+    <inertial>
+      <origin
+        xyz="-0.000118390917580292 -0.000163736453183187 0.0267742198088634"
+        rpy="0 0 0" />
+      <mass
+        value="0.0720973162021037" />
+      <inertia
+        ixx="7.39797977960674E-05"
+        ixy="1.91841330015629E-08"
+        ixz="-1.44551004966344E-07"
+        iyy="4.29032220807131E-05"
+        iyz="6.9802396460188E-06"
+        izz="7.03888404432441E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://dreambo_torso/meshes/neck_yaw_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://dreambo_torso/meshes/neck_yaw_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="neck_yaw_joint"
+    type="revolute">
+    <origin
+      xyz="0.00150000000000007 0 0.201885281374239"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="neck_yaw_link" />
+    <axis
+      xyz="0 0 -1" />
+    <limit
+      lower="-0.5"
+      upper="0.5"
+      effort="14"
+      velocity="30" />
+  </joint>
+  <link
+    name="neck_pitch_link">
+    <inertial>
+      <origin
+        xyz="-0.00405298935067391 0.0245448879865769 -0.000595376655887464"
+        rpy="0 0 0" />
+      <mass
+        value="0.209677573827466" />
+      <inertia
+        ixx="9.70461057171466E-05"
+        ixy="3.19292106789879E-06"
+        ixz="-2.11412218205528E-06"
+        iyy="0.000103980079227489"
+        iyz="2.29375386099599E-06"
+        izz="0.000103780425536474" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://dreambo_torso/meshes/neck_pitch_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://dreambo_torso/meshes/neck_pitch_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="neck_pitch_joint"
+    type="revolute">
+    <origin
+      xyz="0 -0.024629 0.0525"
+      rpy="0 0 0" />
+    <parent
+      link="neck_yaw_link" />
+    <child
+      link="neck_pitch_link" />
+    <axis
+      xyz="0 1 0" />
+    <limit
+      lower="0"
+      upper="0.4"
+      effort="27"
+      velocity="10" />
+  </joint>
+  <link
+    name="neck_roll_link">
+    <inertial>
+      <origin
+        xyz="-0.0197952983922786 -8.23993651088983E-18 -0.00290190936492812"
+        rpy="0 0 0" />
+      <mass
+        value="0.17670887366414" />
+      <inertia
+        ixx="9.05657782540465E-05"
+        ixy="1.59812551141604E-21"
+        ixz="3.26803397082947E-06"
+        iyy="8.745909116263E-05"
+        iyz="-5.04055886471439E-21"
+        izz="8.0215525822056E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://dreambo_torso/meshes/neck_roll_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://dreambo_torso/meshes/neck_roll_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="neck_roll_joint"
+    type="revolute">
+    <origin
+      xyz="-0.0533226000051954 0.0255 -0.012310492209311"
+      rpy="0 0 0" />
+    <parent
+      link="neck_pitch_link" />
+    <child
+      link="neck_roll_link" />
+    <axis
+      xyz="-0.974370064785236 0 -0.22495105434386" />
+    <limit
+      lower="-0.4"
+      upper="0.4"
+      effort="27"
+      velocity="10" />
+  </joint>
+</robot>

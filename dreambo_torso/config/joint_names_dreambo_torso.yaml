@@ -1,0 +1,1 @@
+controller_joint_names: ['', 'l_arm_pitch_joint', 'l_arm_yaw_joint', 'r_arm_pitch_joint', 'r_arm_yaw_joint', 'neck_yaw_joint', 'neck_pitch_joint', 'neck_roll_joint', ]
