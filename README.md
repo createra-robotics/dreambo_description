@@ -1,5 +1,9 @@
 # Dreambo Robot Descriptions
 
+## Dreambo Bipedal Description
+
+Coming soon...
+
 ---
 
 ## Dreambo Torso Description
