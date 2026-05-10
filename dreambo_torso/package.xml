@@ -1,6 +1,6 @@
 <package format="2">
   <name>dreambo_torso</name>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
   <description>
     <p>URDF Description package for dreambo_torso</p>
     <p>This package contains configuration data, 3D models and launch files

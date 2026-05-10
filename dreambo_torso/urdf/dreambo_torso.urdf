@@ -1,51 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
-     Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
-     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
-<robot
-  name="dreambo_torso">
+<robot name="dreambo_torso">
   <link
     name="base_link">
     <inertial>
-      <origin
-        xyz="0.00510423680323092 1.05408567854846E-06 0.0780364587105506"
-        rpy="0 0 0" />
-      <mass
-        value="3.82321438743592" />
-      <inertia
-        ixx="0.00640989034291959"
-        ixy="-1.06937278701886E-07"
-        ixz="4.35704398716628E-05"
-        iyy="0.00803915882264379"
-        iyz="2.76729762060599E-08"
-        izz="0.0107547518033842" />
+      <origin xyz="0.00510423680323092 1.05408567854846E-06 0.0780364587105506" rpy="0 0 0" />
+      <mass value="1e-09" />
+      <inertia ixx="0.00640989034291959" ixy="-1.06937278701886E-07" ixz="4.35704398716628E-05" iyy="0.00803915882264379" iyz="2.76729762060599E-08" izz="0.0107547518033842" />
     </inertial>
     <visual>
-      <origin
-        xyz="0 0 0"
-        rpy="0 0 0" />
+      <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh
-          filename="package://dreambo_torso/meshes/base_link.STL" />
+        <mesh filename="package://dreambo_torso/meshes/base_link.STL" />
       </geometry>
-      <material
-        name="">
-        <color
-          rgba="0.894117647058823 0.894117647058823 0.894117647058823 1" />
+      <material name="">
+        <color rgba="1 1 1 1" />
       </material>
     </visual>
     <collision>
-      <origin
-        xyz="0 0 0"
-        rpy="0 0 0" />
+      <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh
-          filename="package://dreambo_torso/meshes/base_link.STL" />
+        <mesh filename="package://dreambo_torso/meshes/base_link.STL" />
       </geometry>
     </collision>
   </link>
-  <link
-    name="l_arm_pitch_link">
+  <link name="l_arm_pitch_link">
     <inertial>
       <origin
         xyz="-0.00272080141029714 0.00734963864566155 0.00585575478034783"
@@ -84,32 +62,17 @@
       </geometry>
     </collision>
   </link>
-  <joint
-    name="l_arm_pitch_joint"
-    type="revolute">
-    <origin
-      xyz="0.0284969243091808 0.0845270764279396 0.141177215668516"
-      rpy="-0.262997873967215 -0.0977384381116747 0.807389311972579" />
-    <parent
-      link="base_link" />
-    <child
-      link="l_arm_pitch_link" />
-    <axis
-      xyz="0 -1 0" />
-    <limit
-      lower="0"
-      upper="0"
-      effort="40"
-      velocity="10" />
+  <joint name="l_arm_pitch_joint" type="revolute">
+    <origin xyz="0.0284969243091808 0.0845270764279396 0.141177215668516" rpy="-0.262997873967215 -0.0977384381116747 0.807389311972579" />
+    <parent link="base_link" />
+    <child link="l_arm_pitch_link" />
+    <axis xyz="0 -1 0" />
+    <limit lower="-3.14" upper="3.14" effort="10" velocity="1e+08" />
   </joint>
-  <link
-    name="l_arm_yaw_link">
+  <link name="l_arm_yaw_link">
     <inertial>
-      <origin
-        xyz="-0.00609191506312685 0.00115955541487422 0.0137493541862755"
-        rpy="0 0 0" />
-      <mass
-        value="0.00259241901469074" />
+      <origin xyz="-0.00609191506312685 0.00115955541487422 0.0137493541862755" rpy="0 0 0" />
+      <mass value="0.00259241901469074" />
       <inertia
         ixx="5.19111867678668E-07"
         ixy="1.96473346455597E-08"
@@ -142,26 +105,14 @@
       </geometry>
     </collision>
   </link>
-  <joint
-    name="l_arm_yaw_joint"
-    type="revolute">
-    <origin
-      xyz="0.012 0.0869507292306195 0.10052826249908"
-      rpy="-0.349065850398861 0 0" />
-    <parent
-      link="base_link" />
-    <child
-      link="l_arm_yaw_link" />
-    <axis
-      xyz="0 0 -1" />
-    <limit
-      lower="0"
-      upper="0"
-      effort="40"
-      velocity="10" />
+  <joint name="l_arm_yaw_joint" type="revolute">
+    <origin xyz="0.012 0.0869507292306195 0.10052826249908" rpy="-0.349065850398861 0 0" />
+    <parent link="base_link" />
+    <child link="l_arm_yaw_link" />
+    <axis xyz="0 0 -1" />
+    <limit lower="-3.14" upper="3.14" effort="10" velocity="1e+08" />
   </joint>
-  <link
-    name="r_arm_pitch_link">
+  <link name="r_arm_pitch_link">
     <inertial>
       <origin
         xyz="0.00453328942861779 0.00734963610166351 0.00459802861823644"
@@ -212,11 +163,7 @@
       link="r_arm_pitch_link" />
     <axis
       xyz="0 -1 0" />
-    <limit
-      lower="0"
-      upper="0"
-      effort="40"
-      velocity="10" />
+    <limit lower="-3.14" upper="3.14" effort="10" velocity="1e+08" />
   </joint>
   <link
     name="r_arm_yaw_link">
@@ -270,11 +217,7 @@
       link="r_arm_yaw_link" />
     <axis
       xyz="0 0 -1" />
-    <limit
-      lower="0"
-      upper="0"
-      effort="40"
-      velocity="10" />
+    <limit lower="-3.14" upper="3.14" effort="10" velocity="1e+08" />
   </joint>
   <link
     name="neck_yaw_link">
@@ -328,11 +271,7 @@
       link="neck_yaw_link" />
     <axis
       xyz="0 0 -1" />
-    <limit
-      lower="-0.5"
-      upper="0.5"
-      effort="14"
-      velocity="30" />
+    <limit lower="-0.5" upper="0.5" effort="14" velocity="30" />
   </joint>
   <link
     name="neck_pitch_link">
@@ -390,7 +329,7 @@
       lower="0"
       upper="0.4"
       effort="27"
-      velocity="10" />
+      velocity="1e+08" />
   </joint>
   <link
     name="neck_roll_link">
@@ -432,22 +371,11 @@
       </geometry>
     </collision>
   </link>
-  <joint
-    name="neck_roll_joint"
-    type="revolute">
-    <origin
-      xyz="-0.0533226000051954 0.0255 -0.012310492209311"
-      rpy="0 0 0" />
-    <parent
-      link="neck_pitch_link" />
-    <child
-      link="neck_roll_link" />
-    <axis
-      xyz="-0.974370064785236 0 -0.22495105434386" />
-    <limit
-      lower="-0.4"
-      upper="0.4"
-      effort="27"
-      velocity="10" />
+  <joint name="neck_roll_joint" type="revolute">
+    <origin xyz="-0.0533226000051954 0.0255 -0.012310492209311" rpy="0 0 0" />
+    <parent link="neck_pitch_link" />
+    <child link="neck_roll_link" />
+    <axis xyz="-0.974370064785236 0 -0.22495105434386" />
+    <limit lower="-0.4" upper="0.4" effort="27" velocity="20" />
   </joint>
 </robot>
