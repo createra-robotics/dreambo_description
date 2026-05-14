@@ -549,26 +549,13 @@
       </geometry>
     </collision>
   </link>
-  <joint
-    name="r_hip_roll_joint"
-    type="revolute">
-    <origin
-      xyz="-0.057917 0 -0.068"
-      rpy="0 0 0" />
-    <parent
-      link="r_hip_yaw_link" />
-    <child
-      link="r_hip_roll_link" />
-    <axis
-      xyz="1 0 0" />
-    <limit
-      lower="-0.2"
-      upper="0.2"
-      effort="60"
-      velocity="20" />
-    <dynamics
-      damping="10"
-      friction="100" />
+  <joint name="r_hip_roll_joint" type="revolute">
+    <origin xyz="-0.057917 0 -0.068" rpy="0 0 0" />
+    <parent link="r_hip_yaw_link" />
+    <child link="r_hip_roll_link" />
+    <axis xyz="-1 0 0" />
+    <limit lower="-0.2" upper="0.2" effort="60" velocity="20" />
+    <dynamics damping="10" friction="100" />
   </joint>
   <link
     name="r_hip_pitch_link">
@@ -610,18 +597,11 @@
       </geometry>
     </collision>
   </link>
-  <joint
-    name="r_hip_pitch_joint"
-    type="revolute">
-    <origin
-      xyz="0.05781 0.02155 0"
-      rpy="0 0 0" />
-    <parent
-      link="r_hip_roll_link" />
-    <child
-      link="r_hip_pitch_link" />
-    <axis
-      xyz="0 1 0" />
+  <joint name="r_hip_pitch_joint" type="revolute">
+    <origin xyz="0.05781 0.02155 0" rpy="0 0 0" />
+    <parent link="r_hip_roll_link" />
+    <child link="r_hip_pitch_link" />
+    <axis xyz="0 -1 0" />
     <limit
       lower="0"
       upper="1.4"
@@ -671,18 +651,11 @@
       </geometry>
     </collision>
   </link>
-  <joint
-    name="r_knee_pitch_joint"
-    type="revolute">
-    <origin
-      xyz="0 0.0119999999999999 -0.0800000000000005"
-      rpy="0 0 0" />
-    <parent
-      link="r_hip_pitch_link" />
-    <child
-      link="r_knee_pitch_link" />
-    <axis
-      xyz="0 -1 0" />
+  <joint name="r_knee_pitch_joint" type="revolute">
+    <origin xyz="0 0.0119999999999999 -0.0800000000000005" rpy="0 0 0" />
+    <parent link="r_hip_pitch_link" />
+    <child link="r_knee_pitch_link" />
+    <axis xyz="0 1 0" />
     <limit
       lower="-0.4"
       upper="2"
