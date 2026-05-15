@@ -136,7 +136,7 @@
     <parent link="l_hip_roll_link" />
     <child link="l_hip_pitch_link" />
     <axis xyz="0 -1 0" />
-    <limit lower="0" upper="1.4" effort="60" velocity="20" />
+    <limit lower="-0.1" upper="1.7" effort="60" velocity="20" />
     <dynamics damping="10" friction="100" />
   </joint>
   <link name="l_knee_pitch_link">
@@ -312,7 +312,7 @@
     <parent link="r_hip_roll_link" />
     <child link="r_hip_pitch_link" />
     <axis xyz="0 -1 0" />
-    <limit lower="0" upper="1.4" effort="60" velocity="20" />
+    <limit lower="-0.1" upper="1.7" effort="60" velocity="20" />
     <dynamics damping="10" friction="100" />
   </joint>
   <link name="r_knee_pitch_link">
