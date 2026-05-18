@@ -2,13 +2,13 @@
 
 ## Dreambo Bipedal Description
 
-Coming soon...
+![Dreambo Bipedal URDF](img/dreambo_bipedal_urdf.png)
 
 ---
 
 ## Dreambo Torso Description
 
-![Dreambo Torso URDF](assets/dreambo_torso_urdf.png)
+![Dreambo Torso URDF](img/dreambo_torso_urdf.png)
 
 ### 1. Cardanic / Gimbal-driven Spherical Joint (串联双轴正交驱动球形关节)
 
